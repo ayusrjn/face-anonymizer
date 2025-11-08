@@ -9,7 +9,7 @@ if __name__ == "__main__":
 	ap = argparse.ArgumentParser()
 	ap.add_argument("--zip", required=True)
 	ap.add_argument("--out", required=True)
-	ap.add_argument("--clean", action="store_trure", help="wipe output dir before extracting")
+	ap.add_argument("--clean", action="store_true", help="wipe output dir before extracting")
 	args = ap.parse_args()
 
 
@@ -19,9 +19,9 @@ if __name__ == "__main__":
 	if not zip_path.exists():
 		raise SystemExit(f"ZIP not found: {zip_path}")
 
-	if args.clean and out_dir_exists():
+	if args.clean and out_dir.exists():
 		shutil.rmtree(out_dir)
-	out_dir.mkdir(parents=Ture, exist_ok=True)
+	out_dir.mkdir(parents=True, exist_ok=True)
 
 	with zipfile.ZipFile(zip_path) as zf:
 
@@ -30,4 +30,3 @@ if __name__ == "__main__":
 
 	print(f"Extracted {zip_path} -> {out_dir}")
 
-	

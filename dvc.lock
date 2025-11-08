@@ -1,0 +1,20 @@
+schema: '2.0'
+stages:
+  unzip:
+    cmd: python scripts/unzip.py --zip data/raw.zip --out data/raw --clean
+    deps:
+    - path: data/raw.zip
+      hash: md5
+      md5: c0774bc2167b8dfd0044a0fc3c0447da
+      size: 1837488516
+    - path: scripts/unzip.py
+      hash: md5
+      md5: 492e9128d9f620337c64ce7124a07fe8
+      size: 693
+      isexec: true
+    outs:
+    - path: data/raw
+      hash: md5
+      md5: 15c442ad9214c3458e3c7acbac964312.dir
+      size: 1852000110
+      nfiles: 32213

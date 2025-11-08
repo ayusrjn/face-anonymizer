@@ -1,0 +1,8 @@
+stages:
+  unzip:
+    cmd:  python scripts/unzip.py --zip data/raw.zip --out data/raw --clean
+    deps:
+    - data/raw.zip
+    - scripts/unzip.py
+    outs:
+    - data/raw
