@@ -35,6 +35,11 @@ if img is None:
 
 
 results = predict(img)
+''' function can be used for benchmarking'''
+
+# from utils_debug import save_viz
+# save_viz(img, results, "debug_boxes.jpg")
+
 
 
 blurred_frame = gaussian_blur(img, results, KERNEL_SIZE)
