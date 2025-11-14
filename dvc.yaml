@@ -1,8 +1,13 @@
 stages:
   unzip:
-    cmd:  python scripts/unzip.py --zip data/raw.zip --out data/raw --clean
+    cmd: python scripts/unzip.py --zip data/raw.zip --out data/raw --clean
     deps:
     - data/raw.zip
     - scripts/unzip.py
     outs:
     - data/raw
+  download_onnx_model:
+    cmd: dvc import-url 
+      https://huggingface.co/ayusrjn/optimized_face_detection_onnx/resolve/main/v0-1.onnx
+    outs:
+    - models/v0-1.onxx
