@@ -139,15 +139,13 @@ def gaussian_blur(
     """
     img_copy = img.copy()
 
-    # If no results are passed, return the original image copy
     if results is None or results.size == 0:
         return img_copy
 
     H, W = img.shape[:2]
 
-    # Iterate over each detected box in the NumPy array
     for box in results:
-        # Assuming the first four elements are the scaled integer coordinates [x1, y1, x2, y2]
+        
         x1, y1, x2, y2 = box[:4].astype(int)
 
         # Ensure coordinates are in correct order (for safety, though infer.py should handle this)
@@ -174,59 +172,61 @@ def gaussian_blur(
     return img_copy
 
 def gaussian_oval_blur(img: np.ndarray, results: np.ndarray, KERNEL_SIZE: tuple) -> np.ndarray:
-    """ Gaussian_oval_blur - Applies Gaussian Blur in Ellipse (Oval)
-
-        Arguments: img -> np.ndarray Takes in an np.ndarray of the representation of the colored image
-                   results ->  Boxes co-ordinates of the predicted faces from the ONNX model
-                   KERNEL_SIZE -> the kernel size required for the gaussian blur
-        Output: returns the img of with the blurred part of the image by applying the gaussian blur in the elliptical region of interest
     """
+    Apply Gaussian blur inside an ellipse (oval) region for each bounding box.
 
+    Expects `results` with boxes in format [x1, y1, x2, y2, ...].
+    (If your model uses a different box format, adapt the unpacking.)
+    KERNEL_SIZE is used as provided (assumed validated elsewhere).
+    """
     img_copy = img.copy()
 
     if results is None or results.size == 0:
         return img_copy
 
-
     h, w = img.shape[:2]
 
-    for box in results :
+    for box in results:
 
-        x1, x2, y1, y2 = box[:4].astype(int)
+        x1, y1, x2, y2 = box[:4].astype(int)
 
+        
         x1, x2 = min(x1, x2), max(x1, x2)
         y1, y2 = min(y1, y2), max(y1, y2)
 
-        x1 = np.clip(x1, 0, w)
-        x2 = np.clip(x2, 0, w)
-        y1 = np.clip(y1, 0, h)
-        y2 = np.clip(y2, 0, h)
+        x1 = int(np.clip(x1, 0, w))
+        x2 = int(np.clip(x2, 0, w))
+        y1 = int(np.clip(y1, 0, h))
+        y2 = int(np.clip(y2, 0, h))
 
-        roi_h, roi_w = y2 - y1, x2 - x1
+        roi_h = y2 - y1
+        roi_w = x2 - x1
+        if roi_h <= 0 or roi_w <= 0:
+            continue
 
-        if roi_h > 0 and roi_w > 0:
+        roi = img_copy[y1:y2, x1:x2]
 
-            roi = img_copy[y1:y2, x1:x2]
+        
+        axis_w = max(1, roi_w // 2)
+        axis_h = max(1, roi_h // 2)
 
-            blurred_roi_rect = cv2.GaussianBlur(roi, KERNEL_SIZE, 0)
+        
+        blurred_roi_rect = cv2.GaussianBlur(roi, KERNEL_SIZE, 0)
 
-            mask = np.zeros((roi_h, roi_w, 1), dtype=np.uint8)
+        mask = np.zeros((roi_h, roi_w), dtype=np.uint8)
+        center = (roi_w // 2, roi_h // 2)
+        axes = (axis_w, axis_h)
+        cv2.ellipse(mask, center, axes, 0, 0, 360, 255, -1)
 
-            center = (roi_w // 2, roi_h // 2)
-            axis = (roi_w // 2, roi_h // 2)
-            rotation = 0
+        mask_inv = cv2.bitwise_not(mask)
 
-            ellipse = cv2.ellipse(mask,center, axis, rotation, 0, 360, 255, -1)
+        roi_background = cv2.bitwise_and(roi, roi, mask=mask_inv)
+        blurred_foreground = cv2.bitwise_and(blurred_roi_rect, blurred_roi_rect, mask=mask)
 
-            mask_inv = cv2.bitwise_not(mask)
+        final_blurred_roi = cv2.add(roi_background, blurred_foreground)
+        img_copy[y1:y2, x1:x2] = final_blurred_roi
 
-            roi_background = cv2.bitwise_and(roi, roi, mask=mask_inv)
-            blurred_foreground = cv2.bitwise_and(blurred_roi_rect, blurred_roi_rect, mask=mask)
-            final_blurred_roi = cv2.add(roi_background, blurred_foreground)
-
-            img_copy[y1:y2, x1:x2] = final_blurred_roi
-
-        return img_copy
+    return img_copy
 
 # debug utils
 

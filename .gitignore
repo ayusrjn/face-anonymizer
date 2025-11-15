@@ -207,9 +207,3 @@ marimo/_lsp/
 __marimo__/
 
 
-#data versioning
-data/*
-!data/.gitkeep
-!.gitkeep
-
-
