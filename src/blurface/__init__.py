@@ -8,16 +8,14 @@ except PackageNotFoundError:
     __version__ = "0.0.0"
 
 from .pipeline import (
-    parse_args,
-    make_kernel_odd,
-    select_blur_function,
-    process_frame,
     run_on_image,
     run_on_dir,
     run_on_video,
 )
 
+
 def main():
+    from .pipeline import parse_args, make_kernel_odd, run_on_image, run_on_dir, run_on_video
 
     args = parse_args()
     kernel_val = make_kernel_odd(args.kernel)
@@ -30,6 +28,7 @@ def main():
     if args.vid:
         run_on_video(args.vid, blur_choice, kernel_val)
 
+    
 __all__ = [
     "run_on_image",
     "run_on_dir",
