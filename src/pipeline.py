@@ -180,9 +180,7 @@ def run_on_video(video_path, blur_name, kernel_val):
             frame_idx += 1
             progress_bar.update(1)
 
-            if frame_idx % 30 == 0:
-                progress_bar.set_postfix({"fps" : math.floor(fps)})
-
+            
     finally:
         progress_bar.close()
 
